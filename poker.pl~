@@ -1,0 +1,969 @@
+
+suits([clubs, diamonds, hearts, spades]). 
+
+ranks([deuce, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace]).
+
+suit(X) :- suits(S), member(X, S).
+rank(X) :- ranks(S), member(X, S).
+card((R, S)) :- rank(R), suit(S).
+
+
+
+indexOf([Element|_], Element, 0). % Element in first index
+indexOf([_|Tail], Element, Index):-
+  indexOf(Tail, Element, Index1), % Check in the tail of the list
+  Index is Index1+1.  % and increment the resulting index
+
+
+less_than_one(R1,R2) :-
+	ranks(R),    
+	(indexOf(R,R1,RankValue1)),
+	(indexOf(R,R2,RankValue2)),	
+	CheckValue is RankValue2 + 1,
+	RankValue1 = CheckValue.
+
+not_less_than_one(R1,R2) :-
+	ranks(R),    
+	(indexOf(R,R1,RankValue1)),
+	(indexOf(R,R2,RankValue2)),	
+	CheckValue is RankValue2 + 1,
+	RankValue1 \== CheckValue.
+
+
+
+
+greater_suit(S1, S2) :- 
+	suits(S),    
+    (indexOf(S,S1,SuitValue1)),
+    (indexOf(S,S2,SuitValue2)),
+	SuitValue1 > SuitValue2.
+
+greater_rank(R1, R2) :-
+    ranks(R),    
+    (indexOf(R,R1,RankValue1)),
+    (indexOf(R,R2,RankValue2)),
+	RankValue1 > RankValue2.
+
+
+equal_suit(S1, S2) :- 
+	suits(S),    
+    (indexOf(S,S1,SuitValue1)),
+    (indexOf(S,S2,SuitValue2)),
+	SuitValue1 = SuitValue2.
+
+
+equal_rank(R1, R2) :-
+    ranks(R),    
+    (indexOf(R,R1,RankValue1)),
+    (indexOf(R,R2,RankValue2)),
+	RankValue1 = RankValue2.
+
+
+/* ORDER: "spades, hearts, diamonds, clubs" */
+/* Succeeds if S1 is a lower suit than the suit S2. */
+/* Is S1 < S2? */
+lower_suit(S1, S2) :- 
+	suits(S),    
+    (indexOf(S,S1,SuitValue1)),
+    (indexOf(S,S2,SuitValue2)),
+	SuitValue1 < SuitValue2.
+
+
+/* ORDER: "Ace = Highest, Deuce = Lowest" */
+/* Succeeds if R1 is a lower rank than the rank R2. */
+
+lower_rank(R1, R2) :-
+    ranks(R),    
+    (indexOf(R,R1,RankValue1)),
+    (indexOf(R,R2,RankValue2)),
+	RankValue1 < RankValue2.
+   
+ 
+/* Succeeds if card (R1, S1) is lower than card (R2, S2) in the hand ordering. 
+*/
+lower_card((R1, S1), (R2, S2)) :-  
+    
+    %C1 rank AND suit lower than C2
+    lower_rank(R1, R2),
+    lower_suit(S1, S2); 
+
+    %C1 rank equal,suit lower than C2
+    equal_rank(R1, R2),
+    lower_suit(S1, S2);
+    
+    %%C1 suit eqial, rank lower than C2
+    equal_suit(S1, S2),
+    lower_rank(R1, R2);
+    
+    %C1 rank lower, suit greater than C2
+    lower_rank(R1, R2),
+    greater_suit(S1, S2).
+
+/*    
+    lower_suit(S1, S2),
+    greater_rank(R1, R2).
+*/	
+
+
+
+
+
+len([], LenResult):-
+    LenResult is 0.
+
+len([_|Y], LenResult):-
+    len(Y, L),
+    LenResult is L + 1.
+
+
+sorted_hand(H, N) :-       
+    length(H,2),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard));
+   
+    length(H,N),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard)),
+    len(TotalDeck,ListLength),
+    sorted_hand(TotalDeck, ListLength).
+    
+    
+
+/*
+goal(Stuff):-
+  do_something(X),
+  if_something(Y)-> do_this(Y) ; true,
+  always_do_this(Z).
+*/
+
+
+
+
+check_four(H) :-
+   
+
+
+
+	[(FirstCardRank,_)|TotalDeck] = H,
+	[(SecondCardRank,_)|TotalDeck2] = TotalDeck,	
+	[(ThirdCardRank,_)|TotalDeck3] = TotalDeck2,
+	[(FourthCardRank,_)|TotalDeck4] = TotalDeck3,	  
+	[(FifthCardRank,_)|_] = TotalDeck4,	  
+	
+	FirstCardRank = SecondCardRank,
+	SecondCardRank = ThirdCardRank,
+	ThirdCardRank = FourthCardRank;	
+        
+
+
+
+	
+	[(FirstCardRank,_)|TotalDeck] = H,
+	[(SecondCardRank,_)|TotalDeck2] = TotalDeck,	
+	[(ThirdCardRank,_)|TotalDeck3] = TotalDeck2,
+	[(FourthCardRank,_)|TotalDeck4] = TotalDeck3,	  
+	[(FifthCardRank,_)|_] = TotalDeck4,	
+		
+	SecondCardRank = ThirdCardRank,
+	ThirdCardRank = FourthCardRank,	
+   	FourthCardRank = FifthCardRank.
+
+/*
+
+    [(FirstCardRank,_)|TotalDeck] = H,
+    count(FirstCardRank,TotalDeck,Count1),
+    (Count1 == 3)
+    -> true;
+        
+    [(_)|TotalDeck] = H,
+    [(FirstCardRank,_)|TotalDeck1] = TotalDeck,    
+    count(FirstCardRank,TotalDeck1,Count1),
+    (Count1 == 3)
+    -> true;
+    
+    false.
+*/
+
+
+%four_of_kind([(five,hearts),(four,spades),(four,hearts),(four,diamonds),(four,clubs)]).
+%four_of_kind([(four,spades),(four,hearts),(four,diamonds),(four,clubs),(three,hearts)]).
+%trace,findall(H, four_of_kind(H), _L), length(_L, Len).
+
+four_of_kind(H) :-          
+  
+ 
+  len(H,ListLength),
+  MaxLength = 5,
+  ListLength == MaxLength,!, 
+  sorted_hand(H, ListLength),
+  check_four(H).
+	
+ 	
+
+
+	
+
+check_house(H) :-
+    
+    
+    %This was made in an attempt to see if the 
+    %recursion version was faster or slower because
+    % the test banks never completed.
+    %I did NOT see that the tests were bugged
+    
+    
+    
+    
+   	%First three same, last two pair
+	%This is how it's setup
+	%[(FirstCardRank,FirstCardSuit)|TotalDeck] = H,
+    %[(SecondCardRank,SecondCardSuit)|NextPair] = TotalDeck,   
+    %[(ThirdCardRank,ThirdCardSuit)|FinalTwoCardCheck] = NextPair,
+    
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|NextPair] = TotalDeck,   
+    [(ThirdCardRank,_)|FinalTwoCardCheck] = NextPair,
+    FirstCardRank == SecondCardRank,
+    ThirdCardRank == SecondCardRank,
+    %Last two cards
+    [(FirstCardRank2,_)|TotalDeck2] = FinalTwoCardCheck,
+    [(SecondCardRank2,_)|_] = TotalDeck2,   
+    FirstCardRank2 == SecondCardRank2;
+    
+    
+    %OR First 2 pair, last three same (reverse of above)
+    
+    [(FirstCardRank2,_)|TotalDeck2] = H,
+    [(SecondCardRank2,_)|LastThree] = TotalDeck2,   
+    FirstCardRank2 == SecondCardRank2,
+    
+    
+    %[(FirstCardRank,FirstCardSuit)|TotalDeck] = LastThree,
+    %[(SecondCardRank,SecondCardSuit)|NextPair] = TotalDeck,   
+    %[(ThirdCardRank,ThirdCardSuit)|FinalTwoCardCheck] = NextPair,
+    
+    [(FirstCardRank,_)|TotalDeck] = LastThree,
+    [(SecondCardRank,_)|NextPair] = TotalDeck,   
+    [(ThirdCardRank,_)|_] = NextPair,
+    FirstCardRank == SecondCardRank,
+    ThirdCardRank == SecondCardRank.
+    
+
+
+
+full_house(H) :-
+    
+    len(H,ListLength),
+    MaxLength = 5,
+    ListLength == MaxLength,!,
+    sorted_hand(H, ListLength),
+    check_house(H).
+    
+    
+
+
+
+
+
+
+reverse_sorted_hand(H, N) :-       
+    
+    
+    %[(FirstCardRank,FirstCardSuit)|TotalDeck] = H,
+    %[(SecondCardRank,SecondCardSuit)|_] = TotalDeck,
+    
+    length(H,2),
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|_] = TotalDeck,
+	greater_rank((SecondCardRank),(FirstCardRank));
+    
+    length(H,N),
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|_] = TotalDeck,
+	greater_rank((SecondCardRank),(FirstCardRank)),
+    len(TotalDeck,ListLength),
+    reverse_sorted_hand(TotalDeck, ListLength).
+
+
+%Checks to see if every value has the SAME suit
+check_suits(H) :-
+   
+    
+    %[(FirstCardRank,FirstCardSuit)|TotalDeck] = H,
+    %[(SecondCardRank,SecondCardSuit)|_] = TotalDeck,       
+    length(H,2),            
+    [(_,FirstCardSuit)|TotalDeck] = H,
+    [(_,SecondCardSuit)|_] = TotalDeck,   
+    equal_suit(FirstCardSuit,SecondCardSuit);
+        
+    /*   
+    [(FirstCardRank,FirstCardSuit)|TotalDeck] = H,
+    [(SecondCardRank,SecondCardSuit)|_] = TotalDeck,        
+    FirstCardSuit == SecondCardSuit,
+	check_ranks(TotalDeck).  
+    */
+
+    [(_,FirstCardSuit)|TotalDeck] = H,
+    [(_,SecondCardSuit)|_] = TotalDeck,        
+    equal_suit(FirstCardSuit,SecondCardSuit),
+    check_suits(TotalDeck).
+
+
+
+
+
+checkDupes([(Element,_)|_], Element):- !.
+checkDupes([_|Tail], Element):-
+  checkDupes(Tail, Element),
+  !.
+
+
+
+
+check_ranks(H,ListLength) :- 
+    
+    length(H,2),  
+    ([(TheRank,_)|RestsOfCards]) = H,
+    not(checkDupes(RestsOfCards,TheRank));
+    
+    ([(TheRank,_)|RestsOfCards]) = H,
+    not(checkDupes(RestsOfCards,TheRank))    
+    ->  check_ranks(RestsOfCards,ListLength),
+    !.
+    
+    
+sorted_out_hands(H,ListLength) :-
+    sorted_hand(H, ListLength)
+    ->  false;
+    reverse_sorted_hand(H, ListLength) 
+    ->  false;
+    true.
+
+
+
+
+
+
+
+/* DELETE MEEEEEEEEEEEEEEEEE
+
+%Checks to see if every value has the SAME suit
+check_suits(H) :-  
+    length(H,2),            
+    [(_,FirstCardSuit)|TotalDeck] = H,
+    [(_,SecondCardSuit)|_] = TotalDeck,   
+    equal_suit(FirstCardSuit,SecondCardSuit);
+    
+    [(_,FirstCardSuit)|TotalDeck] = H,
+    [(_,SecondCardSuit)|_] = TotalDeck,        
+    equal_suit(FirstCardSuit,SecondCardSuit),
+    check_suits(TotalDeck).
+
+*/
+
+
+%check_order([(six,hearts),(five,hearts),(four,hearts),(three,hearts),(deuce,hearts)]).
+
+%check_not_less_than_one_order([(three, clubs),  (three, clubs),  (three, clubs),  (three, clubs)]).
+%check_less_than_one_order([(six,hearts),(five,hearts),(four,hearts),(three,hearts),(deuce,hearts)]).
+
+
+%%check_not_less_than_one_order([(six,hearts),(five,hearts),(four,hearts),(three,hearts),(deuce,hearts)]).
+%check_flush([(six,hearts),(five,hearts),(four,hearts),(three,hearts),(deuce,hearts)]).
+
+%check_flush([(nine, clubs), (five, clubs),  (four, clubs),  (three, clubs),  (deuce, clubs)]).
+%straight_flush([(five, clubs), (four, clubs),  (three, clubs),  (deuce, clubs),  (ace, clubs)]).
+%check_straight_flush([(five, clubs), (four, clubs),  (three, clubs),  (deuce, clubs),  (ace, clubs)]).
+%check_straight_flush([(nine, clubs), (five, clubs),  (four, clubs),  (three, clubs),  (deuce, clubs)]).
+
+
+
+check_less_than_one_order(H) :-     
+    length(H,2),  
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,    
+    less_than_one(TheRank,TheRank2);
+
+    length(H,2),  
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,    
+    TheRank1 = deuce, 
+    TheRank2 = ace;
+
+
+    
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,
+    less_than_one(TheRank,TheRank2),
+    check_less_than_one_order(RestOfCards).
+
+
+
+
+
+
+
+check_first(H) :-    
+
+
+
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,
+    not_less_than_one(TheRank,TheRank2);
+
+
+    ([(_)|RestOfCards]) = H,
+    ([(TheRank1,_)|RestOfCards2]) = RestOfCards,
+    ([(TheRank2,_)|_]) = RestOfCards2,
+    not_less_than_one(TheRank1,TheRank2);
+
+
+    ([(_)|RestOfCards]) = H,
+    ([(_)|RestOfCards2]) = RestOfCards,
+    ([(TheRank1,_)|RestOfCards3]) = RestOfCards2,
+    ([(TheRank2,_)|_]) = RestOfCards3,
+    not_less_than_one(TheRank1,TheRank2);
+
+
+    ([(_)|RestOfCards]) = H,
+    ([(_)|RestOfCards2]) = RestOfCards,
+    ([(_)|RestOfCards3]) = RestOfCards2,
+    ([(TheRank1,_)|RestOfCards4]) = RestOfCards3,
+    ([(TheRank2,_)|_]) = RestOfCards4,
+    not_less_than_one(TheRank1,TheRank2);
+
+    ([(_)|RestOfCards]) = H,
+    ([(_)|RestOfCards2]) = RestOfCards,
+    ([(_)|RestOfCards3]) = RestOfCards2,
+    ([(TheRank1,_)|RestOfCards4]) = RestOfCards3,
+    ([(TheRank2,_)|_]) = RestOfCards4,
+    TheRank1 = deuce, 
+    TheRank2 = ace.
+
+
+
+
+
+sorted_hand_flush(H, N) :-       
+    length(H,2),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard));
+
+    length(H,2),
+    [(FirstCard,_)|TotalDeck] = H,
+    [(SecondCard,_)|_] = TotalDeck,    
+    FirstCard = deuce, 
+    SecondCard = ace.   	
+
+    length(H,N),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard)),
+    len(TotalDeck,ListLength),
+    sorted_hand_flush(TotalDeck, ListLength).
+    
+
+check_straight_flush(H) :-
+	check_suits(H),
+        check_less_than_one_order(H).
+
+
+
+straight_flush(H) :-
+    len(H,ListLength),
+    MaxLength = 5,
+    ListLength == MaxLength,!,  
+    sorted_hand_flush(H, ListLength),
+    check_straight_flush(H).
+   
+
+check_flush(H) :-
+    
+	check_suits(H).
+%       check_less_than_one_order(H).
+
+    
+    
+
+    
+
+	   
+
+%flush([(five,hearts),(four,hearts),(three,hearts),(deuce,hearts),(nine,hearts)]).    
+
+flush(H) :-
+    len(H,ListLength),
+    MaxLength = 5,
+    ListLength == MaxLength,!,
+sorted_hand(H, ListLength),
+ check_flush(H).
+ 
+
+
+  
+   
+    
+
+ 
+   
+    
+    
+    
+    
+    
+
+
+
+%straight_sorted_hand([(five,hearts),(four,hearts),(three,hearts),(deuce,hearts),(ace,hearts)]).  
+%straight_sorted_hand([(five,hearts),(four,hearts),(three,hearts),(deuce,hearts),(ace,hearts)]).    
+%straight_sorted_hand([(ace,hearts),(king,hearts),(three,hearts),(deuce,hearts),(ace,hearts)]).
+straight_sorted_hand([(ace,hearts),(king,hearts),(queen,hearts),(jack,hearts),(ten,hearts)]).
+
+
+straight_sorted_hand(H) :-       
+    length(H,2),  
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,    
+    less_than_one(TheRank,TheRank2);
+    
+    %This part makes sure that if the last two cards are an ace and deuce, it's OKAY instead of failing
+    length(H,2),  
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,    
+    TheRank = deuce,
+    TheRank2 = ace;                       
+     
+    ([(TheRank,_)|RestOfCards]) = H,
+    ([(TheRank2,_)|_]) = RestOfCards,
+    less_than_one(TheRank,TheRank2),
+    straight_sorted_hand(RestOfCards).
+    
+
+straight_reverse_sorted_hand(H, N) :-       
+    
+    
+    %[(FirstCardRank,FirstCardSuit)|TotalDeck] = H,
+    %[(SecondCardRank,SecondCardSuit)|_] = TotalDeck,
+    
+    length(H,2),
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|_] = TotalDeck,
+	greater_rank((SecondCardRank),(FirstCardRank));
+    
+    
+    
+    %Okay so this says if the first two cards are an Ace and a deuce, its fine 
+    length(H,5),
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|_] = TotalDeck,
+	FirstCardRank = ace,
+    SecondCardRank = deuce,
+    len(TotalDeck,ListLength),
+    straight_reverse_sorted_hand(TotalDeck, ListLength);
+    
+    
+    length(H,N),
+    [(FirstCardRank,_)|TotalDeck] = H,
+    [(SecondCardRank,_)|_] = TotalDeck,
+	greater_rank((SecondCardRank),(FirstCardRank)),
+    len(TotalDeck,ListLength),
+    straight_reverse_sorted_hand(TotalDeck, ListLength).
+
+
+
+  
+straight_sorted_out_hands(H,ListLength) :-
+    straight_sorted_hand(H, ListLength)
+    ->  false;
+    straight_reverse_sorted_hand(H, ListLength) 
+    ->  false;
+    true.
+
+
+
+
+
+
+
+
+
+check_if_straight(H) :-
+	check_suits(H) 		%makes sure every suit is different / min. of 2 different suits        		
+	-> false;
+	straight_sorted_hand(H).  
+
+straight(H) :-
+        
+    len(H,ListLength),
+    MaxLength = 5,
+    ListLength == MaxLength,!,
+    sorted_hand(H, ListLength),    
+    check_if_straight(H).
+    
+    	    
+
+
+
+
+
+
+checkDupesCards([(Element)|_], Element):- !.
+checkDupesCards([_|Tail], Element):-
+  checkDupesCards(Tail, Element),
+  !.
+
+
+
+
+
+
+%This program I found online counts the total occurances on a specified element in the given list
+%Called by going count(ElementToLookFor,TheList,FinalTotalCount).
+count(_, [], 0).
+count(X, [(X,_) | T], N) :-
+  !, count(X, T, N1),
+  N is N1 + 1.
+count(X, [_ | T], N) :-
+  count(X, T, N).
+
+
+
+/*
+
+straight_sorted_out_hands(H,ListLength) :-
+    straight_sorted_hand(H, ListLength)
+    ->  false;
+    straight_reverse_sorted_hand(H, ListLength) 
+    ->  false;
+    true.
+*/
+
+
+check_three_dupes(H):-
+    %To be honest I didn't know how continue the list from a previous state,
+    %so here I keep cutting the list to the appropriate size. SInce I only need
+    %to check a max of 4 times, these three instances cut the list 4 times, making it 
+    %one less shorter than the previous one. 
+    %Also, this only checks if the first 4 cards have any duplicates. The last one isnt
+    %checked because why would you???
+    [(_)|TotalDeck] = H,
+    [(FirstCard)|_] = H,						  % These lines take the first card in each list
+    not(checkDupesCards(TotalDeck,FirstCard)),    % and makes sure there is no duplicates (same for ones below)
+    
+    [(_)|TotalDeck1] = TotalDeck,
+    [(FirstCard1)|_] = TotalDeck,
+    not(checkDupesCards(TotalDeck1,FirstCard1)),
+            
+    [(_)|TotalDeck2] = TotalDeck1,
+    [(FirstCard2)|_] = TotalDeck1,
+    not(checkDupesCards(TotalDeck2,FirstCard2)),
+
+	[(_)|TotalDeck3] = TotalDeck2,
+    [(FirstCard3)|_] = TotalDeck2,
+    not(checkDupesCards(TotalDeck3,FirstCard3)).
+
+
+find_three_pairs(H) :- 
+    
+  	check_three_dupes(H), %this only checks if the first card has any fake duplicate cards. 
+    [(FirstCardRank,_)|TotalDeck] = H,	
+    count(FirstCardRank,TotalDeck,Count1),
+    (Count1 == 3)
+    -> false;    
+    check_three_dupes(H), %this only checks if the first card has any fake duplicate cards. 
+    [(FirstCardRank,_)|TotalDeck] = H,	
+    count(FirstCardRank,TotalDeck,Count1),
+    (Count1 == 2),
+    !;    	 
+        
+    check_three_dupes(H),
+	[(_)|TotalDeck] = H,    
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,    
+    count(FirstCardRank1,TotalDeck1,Count2),
+    (Count2 == 3)
+    -> false;  
+    check_three_dupes(H),
+	[(_)|TotalDeck] = H,    
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,    
+    count(FirstCardRank1,TotalDeck1,Count2),
+    Count2 == 2,
+    !;
+    	
+   	check_three_dupes(H),
+  	[(_)|TotalDeck] = H,
+    [(_)|TotalDeck1] = TotalDeck,
+    [(FirstCardRank2,_)|TotalDeck2] = TotalDeck1,
+    count(FirstCardRank2,TotalDeck2,Count3),
+    Count3 == 2,
+    !.               			 	  
+
+three_of_kind(H) :-
+    len(H,ListLength),
+    MaxLength = 5,
+    ListLength == MaxLength,              
+	find_three_pairs(H).  
+
+
+
+
+
+%	find_two_pairs([(nine,spades),(five,diamonds),(four,clubs),(five,clubs),(four,spades)]).
+%	1. Look at first card 
+%	2. Check to see if deck has first card
+%	3. If YES, then remove that first card and search deck using NEW first card
+%	4. If pair with NEW first card, then there is a double pair
+%	
+%	5. If first card fails, look at next card.
+%	6. These last four cards need to be pairs of each other in some way
+%	7. 
+%	
+%	
+find_two_pairs(H) :-
+    
+	
+    [(FirstCardRank,_)|TotalDeck] = H,	   				% #1	
+    count(FirstCardRank,TotalDeck,Count1), 				% #2
+    (Count1 == 1),						   				% #3	
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,	% #3
+    count(FirstCardRank1,TotalDeck1,Count2),			% #4
+    (Count2 == 1);
+    		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    [(FirstCardRank,_)|TotalDeck] = H,	   				% #1	
+    count(FirstCardRank,TotalDeck,Count1), 				% #2
+    (Count1 == 1),						   				% #3	
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,
+    	[(FirstCardRank2,_)|TotalDeck2] = TotalDeck1,
+    count(FirstCardRank2,TotalDeck2,Count3),			% #4
+    (Count3 == 1);
+ 			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    [(FirstCardRank,_)|TotalDeck] = H,	   				% #1	
+    count(FirstCardRank,TotalDeck,Count1), 				% #2
+    (Count1 == 1),						   				% #3	
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,
+    [(FirstCardRank2,_)|TotalDeck2] = TotalDeck1,
+    [(FirstCardRank3,_)|TotalDeck3] = TotalDeck2,
+    count(FirstCardRank3,TotalDeck3,Count4),			% #4
+    (Count4 == 1);
+    
+    
+    % FIRST CARD DID NOT HAVE A PAIR
+    
+    
+    [(FirstCardRank,_)|TotalDeck] = H,					% #5
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,	
+    count(FirstCardRank1,TotalDeck1,Count1),    
+    (Count1 == 1),
+    [(FirstCardRank2,_)|TotalDeck2] = TotalDeck1,	
+    count(FirstCardRank2,TotalDeck2,Count2),    
+    (Count2 == 1);
+			%%%%%%%%%%%%%%%%%%%%%
+	[(FirstCardRank,_)|TotalDeck] = H,					% #5
+    [(FirstCardRank1,_)|TotalDeck1] = TotalDeck,	
+    count(FirstCardRank1,TotalDeck1,Count1),    
+    (Count1 == 1),
+    [(FirstCardRank2,_)|TotalDeck2] = TotalDeck1,	
+    [(FirstCardRank3,_)|TotalDeck3] = TotalDeck2,
+    count(FirstCardRank3,TotalDeck3,Count2),    
+    (Count2 == 1).
+    
+
+two_pair(H) :-
+    not(three_of_kind(H)), 
+    check_three_dupes(H), %Its called three dupes but it actually checks if the 5 card hand has any dupes    
+    find_two_pairs(H),
+    !.
+    
+
+
+
+
+
+
+/*
+
+sorted_hand(H, N) :-       
+    length(H,2),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard));
+    
+    length(H,N),
+    [FirstCard|TotalDeck] = H,
+    [SecondCard|_] = TotalDeck,    
+    lower_card((SecondCard),(FirstCard)),
+    len(TotalDeck,ListLength),
+    sorted_hand(TotalDeck, ListLength).
+    
+*/
+    
+
+
+
+
+find_one_pair(H) :-
+    length(H,2),    
+    [(FirstCardRank,_)|TotalDeck] = H,	
+    count(FirstCardRank,TotalDeck,Count1),
+    (Count1 == 1),
+    !;
+    
+   
+    [(FirstCardRank,_)|TotalDeck] = H,	
+    count(FirstCardRank,TotalDeck,Count1),
+    (Count1 == 1)->
+    true,!;
+    [(_)|TotalDeck] = H,	
+    find_one_pair(TotalDeck).
+    
+    
+    
+%%I didn't have time to check, but I'm assuming that if a hand does NOT HAVE A:
+%	two pairs
+%	three-of-a-kind
+%	four-of-a-kind
+%	Then every card rannk is unique except for 1 single pair
+%	Here I only use two pair to make sure that its neither 3 of a kind or two pair
+%	I also completely forgot I had the four of a kind function for the one above, so there is a lot of uneeded stuff
+
+    
+
+one_pair(H) :- 
+    not(three_of_kind(H)),
+    not(four_of_kind(H)),
+    not(two_pair(H)),
+    find_one_pair(H).
+    
+    	
+    
+
+
+
+
+
+
+
+
+    
+/* Query: query to test
+   X: Term to solve in query
+   Inf: number of inferences needed to execute the query
+   Res: the variable representing the list of all solutions
+   Test: query that must be true for Res for test to pass
+*/
+test(Query, X, Inf, Res, Test) :-
+    statistics(inferences, I1),
+    call(findall(X, Query, Res)),
+    statistics(inferences, I2),
+    Inf is I2 - I1,
+    call(Test) -> 
+    	(write('success '), write(Inf), nl, !) ;
+    	(write('failure '), write(Res), nl, fail).
+test(_, _, 0, _, _).
+
+	
+
+test_all(Inf) :-
+    write('1. Card comparisons: '),
+    /* How many cards are between eight of spades and jack of diamonds? */
+	test((lower_card(C, (jack, diamonds)), lower_card((eight, spades), C)),
+         C, Inf1, R1, length(R1, 9)),
+    
+    write('2. Sorting your hand: '),
+    /* How many sorted five-card poker hands have the queen of hearts and then
+     * the six of diamonds specifically as the fourth card? */ 
+    test((H1 = [_, _, _, (six, diamonds), _], sorted_hand(H1, 5), member((queen, hearts), H1)),
+         H1, Inf2, R2, length(R2, 8976)),
+    
+    write('3. Four of a kind: '),
+    /* How many four of kind hands contain the jack of diamonds? */
+    test((four_of_kind(H2), member((jack, diamonds), H2)), H2, Inf3, R3, length(R3, 60)),
+    
+    write('4. Full house: '),
+    /* How many full houses have a diamond as second card, and jack of spades as third? */
+    test((H3=[_, (_, diamonds), (jack, spades), _, _], full_house(H3)), H3, Inf4, R4,
+         length(R4, 18)), 
+    
+    write('5. Flush: '),
+    /* How many flushes have a ten as second card, and a six as a third card? */
+    test((H4=[_, (ten, _), (six, _), _, _], flush(H4)), H4, Inf5, R5, length(R5, 96)),
+    
+    write('6. Straight: '),
+    /* How many straights start and end with a diamond? */
+    test((H5=[(_,diamonds),_,_,_,(_, diamonds)], straight(H5)), H5, Inf6, R6, length(R6, 630)),
+    
+    write('7. Straight flush: '),
+    /* How many straight flushes do not contain an eight? */
+    test((straight_flush(H6), not(member((eight, _), H6))), H6, Inf7, R7, length(R7, 20)),
+    
+    write('8. Three of a kind: '),
+    /* How many three of a kind hands do not contain any spades? */
+    test((three_of_kind(H7), not(member((_, spades), H7))), H7, Inf8, R8, length(R8, 7722)),
+    
+    write('9. One pair: '),
+    /* How many hands that have one pair have the suit pattern HSHSH? */
+    test((H8=[(_,hearts), (_,spades), (_,hearts), (_, spades), (_, hearts)], one_pair(H8)),
+         H8, Inf9, R9, length(R9, 1430)),
+    
+    write('10. Two pair: '),
+    /* How many sorted two pair hands have the suit pattern C*C*H ? */
+    test((H9 = [(_, clubs),(_, _),(_, clubs),(_, _),(_, hearts)], two_pair(H9)), H9, Inf10,
+         R10, length(R10, 858)),
+    
+    /* Total inferences */
+    Inf is Inf1 + Inf2 + Inf3 + Inf4 + Inf5 + Inf6 + Inf7 + Inf8 + Inf9 + Inf10.
+
+test_all2(Inf) :-
+    write('1. Card comparisons: '),
+    /* How many sorted hands contain at least one card from each suit? */
+	test((sorted_hand(H1,5), memberchk((_,spades),H1), memberchk((_,hearts),H1), memberchk((_,diamonds),H1), (memberchk((_,clubs),H1))),
+         H1, Inf1, R1, length(R1, 685464)),
+    
+    write('2. No pairs: '),
+    /* How many hands made of cards lower than nine don't contain any pairs? */
+    test((lower_rank(R, nine),H11=[(R,_)|_],sorted_hand(H11, 5), not(one_pair(H11) ; two_pair(H11) ; three_of_kind(H11) ; four_of_kind(H11) ; full_house(H11))),
+         H11, Inf2, R2, length(R2, 21504)),
+    
+    write('3. Sorted hand: '),
+    /* No sorted hand contains its first card later again. */
+    test((sorted_hand([H2|T],5), member(H2, T)), H2, Inf3, R3, length(R3, 0)),
+    
+    write('4. Full house: '),
+    /* How many full houses have seven of hearts as the middle card? */
+    test((H3=[_, _, (seven, hearts), _, _], full_house(H3)), H3, Inf4, R4,
+         length(R4, 42)), 
+    
+    write('5. Flush: '),
+    /* How many inferences are needed to find out that a flush can't start and end with two different suits ? */
+    test((HH = [(_,spades),_,_,_,(_,clubs)], flush(HH)),HH,Inf5,R5,length(R5, 0)),
+    
+    write('6. Straight: '),
+    /* How many straights start with jack of spades? */
+    test((H5=[(jack,spades),_,_,_,_], straight(H5)), H5, Inf6, R6, length(R6, 255)),
+    
+    write('7. Four of a kind: '),
+    /* How many four of a kinds do not contain an eight? */
+    test((four_of_kind(H6), not(member((eight, _), H6))), H6, Inf7, R7, length(R7, 528)),
+    
+    write('8. Three of a kind: '),
+    /* How many three of a kinds have some higher and some lower additional card? */
+    test( (H7 = [_,(R,_),(R,_),(R,_),_], three_of_kind(H7)), H7, Inf8, R8, length(R8, 18304)),
+    
+    write('9. One pair: '),
+    /* No one pair is also two pair. */
+    test((H8=[(_,diamonds),_,_,_,_],one_pair(H8), two_pair(H8)),
+         H8, Inf9, R9, length(R9, 0)),
+    
+    write('10. High card: '),
+    /* Using only cards lower than ten, how many hands have nothing better than a high card? */
+    test((lower_rank(R, ten), X = [(R,_)|_],sorted_hand(X, 5), not(one_pair(X) ; two_pair(X) ; three_of_kind(X) ;
+                                                                   four_of_kind(X) ; full_house(X) ; flush(X) ; straight(X) ;
+                                                                   straight_flush(X))), X, Inf10,
+         R10, length(R10, 53040)),
+    
+    /* Total inferences */
+    Inf is Inf1 + Inf2 + Inf3 + Inf4 + Inf5 + Inf6 + Inf7 + Inf8 + Inf9 + Inf10.
+    
